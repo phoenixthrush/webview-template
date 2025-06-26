@@ -40,10 +40,44 @@ def css_url_to_base64(path, site_dir):
     return f'url("{uri}")' if uri else f'url("{path}")'
 
 
+def inline_css_file(file_path, site_dir, processed_files=None, wrap_in_style=True):
+    if processed_files is None:
+        processed_files = set()
+    file_path = file_path.resolve()
+    if file_path in processed_files or not file_path.exists():
+        return None
+    processed_files.add(file_path)
+
+    content = read_file(file_path)
+    if not content:
+        return None
+
+    # Inline @import statements (handle url(...) and quoted files)
+    def import_replacer(import_path):
+        import_path = import_path.strip(' "\'')
+        import_file = (file_path.parent / import_path).resolve()
+        # Recursively process imports without wrapping in <style> tags
+        inlined_content = inline_css_file(import_file, site_dir, processed_files, wrap_in_style=False)
+        return inlined_content or ''
+
+    # Regex to catch @import url(...) and @import '...' or "..."
+    content = re.sub(
+        r'@import\s+(?:url\(([^)]+)\)|["\']([^"\']+)["\']);',
+        lambda m: import_replacer(m.group(1) or m.group(2)),
+        content
+    )
+
+    # Replace url(...) with base64
+    content = re.sub(r'url\(["\']?([^)"\']+)["\']?\)', lambda m: css_url_to_base64(m[1], file_path.parent), content)
+
+    return f"<style>{content}</style>" if wrap_in_style else content
+
+
+
 def process_html(html, site_dir):
     # Replace <link rel="stylesheet" href="..."> with inline <style>
     html = re.sub(r'<link rel="stylesheet" href="([^"]+)">',
-                  lambda m: inline_file(site_dir / m[1], "style", site_dir) or m[0], html)
+                  lambda m: inline_css_file(site_dir / m[1], site_dir) or m[0], html)
 
     # Replace <script src="..."></script> with inline <script>
     html = re.sub(r'<script src="([^"]+)"></script>',

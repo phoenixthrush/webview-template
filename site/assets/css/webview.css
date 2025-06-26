@@ -1,0 +1,51 @@
+/* Hide scrollbars */
+::-webkit-scrollbar {
+    display: none;
+}
+
+html,
+body {
+    background: transparent;
+    -webkit-app-region: drag;
+}
+
+/* Prevent text selection */
+body,
+* {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Hide context menu */
+body {
+    -webkit-touch-callout: none;
+}
+
+/* Remove tap highlight on mobile */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent drag except on draggable regions */
+html,
+body {
+    -webkit-user-drag: none;
+    user-drag: none;
+    pointer-events: auto;
+    -webkit-app-region: no-drag;
+}
+
+/* Allow drag on specific regions */
+.draggable {
+    -webkit-app-region: drag;
+}
+
+/* Prevent image dragging */
+img {
+    -webkit-user-drag: none;
+}
+
+/* Remove outline on focus */
+*:focus {
+    outline: none !important;
+}

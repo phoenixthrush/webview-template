@@ -13,16 +13,18 @@ extern unsigned int index_modified_len;
 #include <objc/message.h>
 #include <objc/runtime.h>
 
+// TODO: window can't be moved without titlebar
 void hide_title_bar(void *webview_window) {
   NSWindow *window = (NSWindow *)webview_window;
   [window setTitleVisibility:NSWindowTitleHidden];
   [window setTitlebarAppearsTransparent:YES];
   [window setStyleMask:[window styleMask] | NSWindowStyleMaskFullSizeContentView];
-  [window setMovableByWindowBackground:YES]; // <-- enables drag from background
+  [window setMovableByWindowBackground:YES]; // <-- should allow drag from background
 
   [[window standardWindowButton:NSWindowCloseButton] setHidden:YES];
   [[window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
   [[window standardWindowButton:NSWindowZoomButton] setHidden:YES];
+
 }
 #endif
 
